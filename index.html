@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VertoX Chat</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="dark-theme">
+    <!-- Background Effects -->
+    <div class="background-effects" id="backgroundEffects">
+        <div class="seasonal-bg" id="seasonalBg"></div>
+        <canvas id="particlesCanvas"></canvas>
+    </div>
+
+    <!-- Поиск чатов оверлей с предпросмотром -->
+    <div class="search-overlay" id="searchOverlay">
+        <div class="search-container">
+            <div class="search-header">
+                <svg class="search-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <input type="text" class="search-input" placeholder="Поиск чатов" id="searchInput" autofocus>
+                <button class="search-close-btn" id="searchCloseBtn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </div>
+
+    <!-- Левое меню -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h1 class="logo">VertoX</h1>
+            <button class="menu-toggle" id="menuToggle">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 6L6 18M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Поиск и создание чата -->
+        <div class="chat-controls">
+            <button class="search-toggle-btn" id="searchToggleBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="m21 21-4.35-4.35"></path>
+                </svg>
+                <span>Поиск чатов</span>
+            </button>
+            <button class="new-chat-btn" id="newChatBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Новый чат
+            </button>
+        </div>
+
+        <!-- Закрепленные чаты -->
+        <div class="pinned-chats-section" id="pinnedChatsSection" style="display: none;">
+            <h4 class="section-title">Закрепленные</h4>
+            <div class="pinned-chats-list" id="pinnedChatsList"></div>
+        </div>
+        
+        <!-- Список чатов -->
+        <div class="chat-list" id="chatList"></div>
+        
+        <!-- Выбор модели -->
+        <div class="model-selector">
+            <button class="model-selector-btn" id="modelSelectorBtn">
+                <div class="model-icon">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"></path>
+                        <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                        <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                    </svg>
+                </div>
+                <div class="model-info">
+                    <span class="model-label">Модель</span>
+                    <span class="model-name" id="currentModelName">Q3 Omega</span>
+                </div>
+                <svg class="model-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 9l6 6 6-6"></path>
+                </svg>
+            </button>
+            <div class="model-dropdown" id="modelDropdown">
+                <div class="model-option" data-model="q1">
+                    <strong>Q1</strong>
+                    <span>Быстрый</span>
+                </div>
+                <div class="model-option" data-model="q2-mini">
+                    <strong>Q2 mini</strong>
+                    <span>Сбалансированный</span>
+                </div>
+                <div class="model-option active" data-model="q3-omega">
+                    <strong>Q3 Omega</strong>
+                    <span>Мощный</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Нижние кнопки меню -->
+        <div class="sidebar-footer">
+            <button class="menu-item" id="pinnedMessagesBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2v10m-7.07 4.93a10 10 0 0014.14 0M5 12h14"></path>
+                </svg>
+                Закрепленные тексты
+            </button>
+            <button class="menu-item" id="subscriptionBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"></path>
+                </svg>
+                Подписки
+            </button>
+            <button class="menu-item" id="settingsBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="3"></circle>
+                    <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1"></path>
+                </svg>
+                Настройки
+            </button>
+            <a href="https://VertoX.net" class="menu-item learn-more" target="_blank">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4m0-4h.01"></path>
+                </svg>
+                Learn more
+            </a>
+        </div>
+    </aside>
+    
+    <!-- Основная область чата -->
+    <main class="chat-container">
+        <!-- Заголовок чата -->
+        <header class="chat-header">
+            <div class="header-left">
+                <button class="sidebar-toggle-btn" id="sidebarToggleBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <button class="share-btn" id="shareBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                    <polyline points="16 6 12 2 8 6"></polyline>
+                    <line x1="12" y1="2" x2="12" y2="15"></line>
+                </svg>
+                Поделиться
+            </button>
+        </header>
+        
+        <!-- Область сообщений -->
+        <div class="messages-container" id="messagesContainer">
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                    </svg>
+                </div>
+                <h1 id="greetingText">Чем могу помочь?</h1>
+                <p>Задайте вопрос или исследуйте с помощью глубокого поиска</p>
+            </div>
+            <div class="messages-list" id="messagesList"></div>
+        </div>
+        
+        <!-- Форма ввода -->
+        <div class="input-area">
+            <div class="input-container">
+                <form class="input-form" id="messageForm">
+                    <button type="button" class="attach-btn" id="attachBtn" title="Прикрепить файл">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                        </svg>
+                    </button>
+                    <input type="file" id="fileInput" style="display: none;" multiple>
+                    
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        placeholder="Введите сообщение..."
+                        rows="1"
+                    ></textarea>
+                    
+                    <button type="button" class="voice-btn" id="voiceBtn" title="Голосовое сообщение">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                            <line x1="12" y1="19" x2="12" y2="23"></line>
+                            <line x1="8" y1="23" x2="16" y2="23"></line>
+                        </svg>
+                    </button>
+                    
+                    <button type="button" class="deep-search-btn" id="deepSearchBtn" title="DeepSearch">
+                        DeepSearch
+                    </button>
+                    
+                    <button type="button" class="deep-think-btn" id="deepThinkBtn" title="DeepThink">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </button>
+                    
+                    <button type="submit" class="send-btn" id="sendBtn" title="Отправить">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно закрепленных текстов -->
+    <div class="modal" id="pinnedTextsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Закрепленные тексты</h3>
+                <button class="close-btn" onclick="closeModal('pinnedTextsModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="pinned-texts-list" id="pinnedTextsList"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Модальные окна -->
+    <!-- Настройки -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Настройки</h3>
+                <button class="close-btn" onclick="closeModal('settingsModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-tabs">
+                    <button class="settings-tab active" data-tab="profile">Профиль</button>
+                    <button class="settings-tab" data-tab="appearance">Внешний вид</button>
+                    <button class="settings-tab" data-tab="background">Фон</button>
+                    <button class="settings-tab" data-tab="language">Язык</button>
+                </div>
+                
+                <div class="settings-content">
+                    <!-- Профиль -->
+                    <div class="settings-panel active" id="profilePanel">
+                        <h4>Профиль пользователя</h4>
+                        <div class="form-group">
+                            <label>Ваше имя</label>
+                            <input type="text" id="userName" placeholder="Например: Noa" class="profile-input">
+                        </div>
+                        <div class="form-group">
+                            <label>Профессия</label>
+                            <input type="text" id="userProfession" placeholder="Например: Разработчик" class="profile-input">
+                        </div>
+                        <div class="form-group">
+                            <label>О себе</label>
+                            <textarea id="userAbout" placeholder="Расскажите немного о себе..." rows="4" class="profile-textarea"></textarea>
+                        </div>
+                        <button class="save-profile-btn" id="saveProfileBtn">Сохранить профиль</button>
+                    </div>
+                    
+                    <!-- Внешний вид -->
+                    <div class="settings-panel" id="appearancePanel">
+                        <h4>Тема оформления</h4>
+                        <div class="theme-options">
+                            <label class="theme-card">
+                                <input type="radio" name="theme" value="dark" checked>
+                                <div class="theme-preview dark">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path>
+                                    </svg>
+                                    <span>Темная</span>
+                                </div>
+                            </label>
+                            <label class="theme-card">
+                                <input type="radio" name="theme" value="light">
+                                <div class="theme-preview light">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="12" cy="12" r="5"></circle>
+                                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                                    </svg>
+                                    <span>Светлая</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Фоны -->
+                    <div class="settings-panel" id="backgroundPanel">
+                        <h4>Фоновые эффекты</h4>
+                        <div class="background-options">
+                            <button class="bg-card active" data-bg="default">
+                                <div class="bg-preview default"></div>
+                                <span>По умолчанию</span>
+                            </button>
+                            <button class="bg-card" data-bg="space">
+                                <div class="bg-preview space"></div>
+                                <span>Космос</span>
+                            </button>
+                            <button class="bg-card" data-bg="summer">
+                                <div class="bg-preview summer"></div>
+                                <span>Лето</span>
+                            </button>
+                            <button class="bg-card" data-bg="spring">
+                                <div class="bg-preview spring"></div>
+                                <span>Весна</span>
+                            </button>
+                            <button class="bg-card" data-bg="autumn">
+                                <div class="bg-preview autumn"></div>
+                                <span>Осень</span>
+                            </button>
+                            <button class="bg-card" data-bg="winter">
+                                <div class="bg-preview winter"></div>
+                                <span>Зима</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Язык -->
+                    <div class="settings-panel" id="languagePanel">
+                        <h4>Язык интерфейса</h4>
+                        <div class="language-options">
+                            <label class="lang-card">
+                                <input type="radio" name="language" value="ru" checked>
+                                <div class="lang-content">
+                                    <span class="lang-flag">🇷🇺</span>
+                                    <span class="lang-name">Русский</span>
+                                </div>
+                            </label>
+                            <label class="lang-card">
+                                <input type="radio" name="language" value="en">
+                                <div class="lang-content">
+                                    <span class="lang-flag">🇬🇧</span>
+                                    <span class="lang-name">English</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Подписки -->
+    <div class="modal" id="subscriptionModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3>Выберите план</h3>
+                <button class="close-btn" onclick="closeModal('subscriptionModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="subscription-tabs">
+                    <button class="tab-btn active" data-tab="personal">Персональный</button>
+                    <button class="tab-btn" data-tab="business">Бизнес</button>
+                </div>
+                
+                <!-- Персональные планы -->
+                <div class="tab-content active" id="personal-tab">
+                    <div class="pricing-cards">
+                        <div class="pricing-card">
+                            <h4>VertoX PRO</h4>
+                            <div class="price">$20<span>/месяц</span></div>
+                            <ul>
+                                <li>Доступ к Q1 и Q2 mini моделям</li>
+                                <li>Стандартный голосовой режим</li>
+                                <li>Данные в режиме реального времени</li>
+                                <li>Ограниченная загрузка файлов</li>
+                                <li>Базовые функции поиска</li>
+                                <li>Поддержка по email</li>
+                            </ul>
+                            <button class="subscribe-btn">Подписаться</button>
+                        </div>
+                        
+                        <div class="pricing-card featured">
+                            <h4>VertoX PRO Plus</h4>
+                            <div class="price">$49<span>/месяц</span></div>
+                            <ul>
+                                <li>Все в базовом плане</li>
+                                <li>Доступ к Q3 Omega модели</li>
+                                <li>Расширенный голосовой режим</li>
+                                <li>Deep Search и Deep Think</li>
+                                <li>Создание пользовательских моделей</li>
+                                <li>Неограниченная загрузка файлов</li>
+                                <li>Приоритетная поддержка</li>
+                            </ul>
+                            <button class="subscribe-btn">Подписаться</button>
+                        </div>
+                        
+                        <div class="pricing-card">
+                            <h4>VertoX PRO Ultra</h4>
+                            <div class="price">$200<span>/месяц</span></div>
+                            <ul>
+                                <li>Все в Plus плане</li>
+                                <li>Неограниченный доступ ко всем моделям</li>
+                                <li>Расширенная аналитика</li>
+                                <li>API доступ</li>
+                                <li>Белая перчатка поддержки</li>
+                                <li>Ранний доступ к новым функциям</li>
+                                <li>Персональный менеджер</li>
+                            </ul>
+                            <button class="subscribe-btn">Подписаться</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Бизнес планы -->
+                <div class="tab-content" id="business-tab">
+                    <div class="business-plans">
+                        <div class="pricing-card">
+                            <h4>Команда</h4>
+                            <div class="price">$25<span>/пользователь/месяц</span></div>
+                            <p class="price-note">Минимум 5 пользователей</p>
+                            <ul>
+                                <li>Все функции Plus плана</li>
+                                <li>Централизованное управление</li>
+                                <li>Общие рабочие пространства</li>
+                                <li>Командная аналитика</li>
+                                <li>Совместная работа в реальном времени</li>
+                                <li>Интеграция с корпоративными системами</li>
+                                <li>Обучение команды</li>
+                            </ul>
+                            <button class="subscribe-btn">Начать с командой</button>
+                        </div>
+                        
+                        <div class="pricing-card featured">
+                            <h4>Бизнес</h4>
+                            <div class="price">$99<span>/пользователь/месяц</span></div>
+                            <p class="price-note">От 20 пользователей</p>
+                            <ul>
+                                <li>Все функции командного плана</li>
+                                <li>Выделенный аккаунт-менеджер</li>
+                                <li>Кастомные AI модели</li>
+                                <li>Расширенная безопасность</li>
+                                <li>SSO и управление доступом</li>
+                                <li>Неограниченный API</li>
+                                <li>Выделенные ресурсы</li>
+                                <li>SLA 99.9%</li>
+                            </ul>
+                            <button class="subscribe-btn">Получить демо</button>
+                        </div>
+                        
+                        <div class="pricing-card">
+                            <h4>Корпоративный</h4>
+                            <div class="price">Индивидуально</div>
+                            <p class="price-note">Для крупных организаций</p>
+                            <ul>
+                                <li>Полностью кастомизированное решение</li>
+                                <li>On-premise установка</li>
+                                <li>Неограниченные пользователи</li>
+                                <li>Выделенная инфраструктура</li>
+                                <li>Соответствие требованиям</li>
+                                <li>Персональная команда поддержки</li>
+                                <li>Индивидуальная разработка</li>
+                                <li>Гибкие условия контракта</li>
+                            </ul>
+                            <button class="contact-btn">Обсудить условия</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
